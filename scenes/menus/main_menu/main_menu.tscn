@@ -6,8 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://d0md062m4j3v5" path="res://scenes/windows/main_menu_credits_window.tscn" id="4_m0ubd"]
 [ext_resource type="Texture2D" uid="uid://cryp5uwobbjlu" path="res://assets/Asset 2.png" id="5_7j6ce"]
 [ext_resource type="PackedScene" uid="uid://cwt4p3bufkke5" path="res://addons/maaacks_game_template/base/nodes/windows/confirmation_popup_window_panel.tscn" id="5_627ab"]
-[ext_resource type="Script" uid="uid://1nf36h0gms3q" path="res://addons/maaacks_game_template/base/nodes/utilities/capture_focus.gd" id="6_qwqm5"]
-[ext_resource type="Script" uid="uid://dmkubt2nsnsbn" path="res://addons/maaacks_game_template/base/nodes/labels/config_version_label.gd" id="7_q0yg5"]
+[ext_resource type="Script" uid="uid://1nf36h0gms3q" path="res://addons/maaacks_game_template/base/nodes/utilities/capture_focus.gd" id="5_m0ubd"]
+[ext_resource type="Script" uid="uid://dmkubt2nsnsbn" path="res://addons/maaacks_game_template/base/nodes/labels/config_version_label.gd" id="6_627ab"]
 
 [node name="MainMenu" type="Control" unique_id=869232425]
 layout_mode = 3
@@ -53,13 +53,13 @@ theme_override_constants/margin_top = 24
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MenuContainer/TitleMargin/TitleContainer" unique_id=1510463748]
+[node name="TextureRect" type="TextureRect" parent="MenuContainer/TitleMargin/TitleContainer" unique_id=23081660]
 layout_mode = 0
-offset_left = 261.0
-offset_top = 4.0
-offset_right = 655.0
-offset_bottom = 221.0
-scale = Vector2(1.4897844, 1.4897844)
+offset_left = 230.99998
+offset_top = -33.000008
+offset_right = 625.0
+offset_bottom = 184.0
+scale = Vector2(1.6798832, 1.6798832)
 texture = ExtResource("5_7j6ce")
 
 [node name="MenuButtonsMargin" type="MarginContainer" parent="MenuContainer" unique_id=210553886]
@@ -90,12 +90,24 @@ size_flags_horizontal = 4
 theme_override_constants/separation = 16
 alignment = 1
 vertical = true
-script = ExtResource("6_qwqm5")
+script = ExtResource("5_m0ubd")
 
-[node name="StartButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" unique_id=2044537792]
+[node name="NewGameButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" unique_id=2044537792]
 unique_name_in_owner = true
 layout_mode = 2
 text = "New Game"
+
+[node name="ContinueGameButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" unique_id=1495566523]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Continue"
+
+[node name="LevelSelectButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" unique_id=1348895676]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Level Select"
 
 [node name="OptionsButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" unique_id=1486236076]
 unique_name_in_owner = true
@@ -142,7 +154,7 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "v0.0.0"
 horizontal_alignment = 2
-script = ExtResource("7_q0yg5")
+script = ExtResource("6_627ab")
 
 [node name="ExitConfirmation" parent="." unique_id=912502155 instance=ExtResource("5_627ab")]
 unique_name_in_owner = true
@@ -171,7 +183,9 @@ text = "Are you sure you want to start a new game?
 
 All progress in the current game will be lost."
 
-[connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/NewGameButton" to="." method="_on_new_game_button_pressed"]
+[connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/ContinueGameButton" to="." method="_on_continue_game_button_pressed"]
+[connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/LevelSelectButton" to="." method="_on_level_select_button_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/OptionsButton" to="." method="_on_options_button_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/CreditsButton" to="." method="_on_credits_button_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/ExitButton" to="." method="_on_exit_button_pressed"]

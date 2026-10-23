@@ -25,7 +25,7 @@ signal game_exited
 var sub_menu : Control
 
 @onready var menu_buttons_box_container = %MenuButtonsBoxContainer
-@onready var start_button = %StartButton
+@onready var new_game_button = %NewGameButton
 @onready var options_button = %OptionsButton
 @onready var credits_button = %CreditsButton
 @onready var exit_button = %ExitButton
@@ -94,7 +94,7 @@ func _hide_exit_for_web() -> void:
 
 func _hide_new_game_if_unset() -> void:
 	if get_game_scene_path().is_empty():
-		start_button.hide()
+		new_game_button.hide()
 
 func _hide_options_if_unset() -> void:
 	if options_packed_scene == null:
@@ -110,7 +110,7 @@ func _ready() -> void:
 	_hide_credits_if_unset()
 	_hide_new_game_if_unset()
 
-func _on_start_button_pressed() -> void:
+func _on_new_game_button_pressed() -> void:
 	new_game()
 
 func _on_options_button_pressed() -> void:

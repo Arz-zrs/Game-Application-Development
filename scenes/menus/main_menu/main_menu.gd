@@ -16,16 +16,29 @@ func load_game_scene() -> void:
 	super.load_game_scene()
 
 func new_game() -> void:
-	GameState.reset()
-	load_game_scene()
+	if confirm_new_game and continue_game_button.visible:
+		new_game_confirmation.show()
+	else:
+		GameState.reset()
+		load_game_scene()
 
 func _add_level_select_if_set() -> void: 
 	if level_select_packed_scene == null: return
 	if GameState.get_levels_reached() <= 1 : return
 	level_select_button.show()
 
+func _show_continue_if_set() -> void:
+	if GameState.get_current_level_path().is_empty(): return
+	continue_game_button.show()
+
 func _ready() -> void:
 	super._ready()
+	_add_level_select_if_set()
+	_show_continue_if_set()
+
+func _on_continue_game_button_pressed() -> void:
+	GameState.continue_game()
+	load_game_scene()
 
 func _on_level_select_button_pressed() -> void:
 	var level_select_scene := _open_sub_menu(level_select_packed_scene)
