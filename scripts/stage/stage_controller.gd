@@ -181,6 +181,12 @@ func _on_popup_start_pressed() -> void:
 	if selected_activity.config.mini_game_type == 1:
 		_start_waste_sorting()
 		return
+	if selected_activity.config.mini_game_type == 2:
+		_start_drain_cleaner()
+		return
+	if selected_activity.config.mini_game_type == 3:
+		_start_river_cleaner()
+		return
 	mini_game_title.text = selected_activity.config.title
 	mini_game_objective.text = _get_objective(selected_activity.config)
 	mini_game_remaining = selected_activity.config.mini_game_duration
@@ -203,6 +209,27 @@ func _start_waste_sorting() -> void:
 	active_mini_game = scene.instantiate()
 	active_mini_game.activity_duration = selected_activity.config.mini_game_duration
 	active_mini_game.max_errors = selected_activity.config.max_errors
+	active_mini_game.mini_game_finished.connect(_on_real_mini_game_finished)
+	active_mini_game.mini_game_closed.connect(_on_real_mini_game_closed)
+	add_child(active_mini_game)
+	mini_game_active = true
+
+func _start_drain_cleaner() -> void:
+	var scene: PackedScene = load("res://scenes/game/mini_games/drain_cleaner/drain_cleaner.tscn")
+	active_mini_game = scene.instantiate()
+	active_mini_game.activity_duration = selected_activity.config.mini_game_duration
+	active_mini_game.target_count = 6
+	active_mini_game.mini_game_finished.connect(_on_real_mini_game_finished)
+	active_mini_game.mini_game_closed.connect(_on_real_mini_game_closed)
+	add_child(active_mini_game)
+	mini_game_active = true
+
+func _start_river_cleaner() -> void:
+	var scene: PackedScene = load("res://scenes/game/mini_games/river_cleaner/river_cleaner.tscn")
+	active_mini_game = scene.instantiate()
+	active_mini_game.activity_duration = selected_activity.config.mini_game_duration
+	active_mini_game.max_errors = selected_activity.config.max_errors
+	active_mini_game.target_count = 8
 	active_mini_game.mini_game_finished.connect(_on_real_mini_game_finished)
 	active_mini_game.mini_game_closed.connect(_on_real_mini_game_closed)
 	add_child(active_mini_game)
