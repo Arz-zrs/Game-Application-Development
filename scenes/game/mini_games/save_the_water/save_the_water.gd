@@ -15,7 +15,12 @@ var remaining_time: float
 var rotations: int = 0
 var finished: bool = false
 var pipe_buttons: Array[Button] = []
-var solution: Array[int] = []
+
+const EMPTY: int = 0
+const UP: int = 1
+const RIGHT: int = 2
+const DOWN: int = 4
+const LEFT: int = 8
 
 func _ready() -> void:
 	remaining_time = activity_duration
@@ -31,39 +36,38 @@ func _process(delta: float) -> void:
 		_finish(false)
 
 func _create_grid() -> void:
-	solution.clear()
+	grid_columns = max(grid_columns, 2)
+	grid_rows = max(grid_rows, 2)
+	grid.columns = grid_columns
 	for child in grid.get_children():
 		child.queue_free()
 	pipe_buttons.clear()
 
-	var straight_indices: Array[int] = [5, 6, 9, 10]
+	var path_masks: Dictionary = {0: RIGHT}
+	for column in range(1, grid_columns - 1):
+		path_masks[column] = LEFT | RIGHT
+	path_masks[grid_columns - 1] = LEFT | DOWN
+	for row in range(1, grid_rows - 1):
+		path_masks[row * grid_columns + grid_columns - 1] = UP | DOWN
+	path_masks[grid_rows * grid_columns - 1] = UP | RIGHT
 	for index in range(grid_columns * grid_rows):
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(76, 76)
-		var is_straight: bool = index in straight_indices
-		var base_rotation: int = 1 if is_straight else randi() % 4
-		button.set_meta("rotation", base_rotation)
-		button.set_meta("straight", is_straight)
+		var base_mask: int = int(path_masks.get(index, EMPTY))
+		var initial_rotation: int = 0
+		if index != 0 and index != grid_columns * grid_rows - 1 and base_mask != EMPTY:
+			initial_rotation = randi_range(0, 3)
+			if _rotate_mask(base_mask, initial_rotation) == base_mask:
+				initial_rotation = (initial_rotation + 1) % 4
+		button.set_meta("base_mask", base_mask)
+		button.set_meta("rotation", initial_rotation)
 		_update_pipe_text(button)
 		button.pressed.connect(_rotate_pipe.bind(button))
 		grid.add_child(button)
 		pipe_buttons.append(button)
-		solution.append(1 if is_straight else base_rotation)
 
 	pipe_buttons[0].disabled = false
 	pipe_buttons[pipe_buttons.size() - 1].disabled = false
-	_randomize_fixed_solution()
-
-func _randomize_fixed_solution() -> void:
-	for index in range(pipe_buttons.size()):
-		var button: Button = pipe_buttons[index]
-		if index == 0 or index == grid_columns * grid_rows - 1:
-			continue
-		if bool(button.get_meta("straight")):
-			continue
-		var random_turn: int = randi() % 4
-		button.set_meta("rotation", random_turn)
-		_update_pipe_text(button)
 
 func _rotate_pipe(button: Button) -> void:
 	if finished:
@@ -79,18 +83,65 @@ func _rotate_pipe(button: Button) -> void:
 		_finish(true)
 
 func _update_pipe_text(button: Button) -> void:
-	var is_straight: bool = bool(button.get_meta("straight"))
+	var base_mask: int = int(button.get_meta("base_mask"))
 	var rotation: int = int(button.get_meta("rotation"))
-	if is_straight:
-		button.text = "|" if rotation % 2 == 0 else "-"
+	var mask: int = _rotate_mask(base_mask, rotation)
+	var index: int = pipe_buttons.find(button)
+	if index == 0:
+		button.text = "Source >"
+	elif index == pipe_buttons.size() - 1:
+		button.text = "Dest ^ >"
+	elif mask == (UP | DOWN):
+		button.text = "|"
+	elif mask == (LEFT | RIGHT):
+		button.text = "-"
+	elif mask == (UP | RIGHT):
+		button.text = "UR"
+	elif mask == (RIGHT | DOWN):
+		button.text = "RD"
+	elif mask == (DOWN | LEFT):
+		button.text = "DL"
+	elif mask == (LEFT | UP):
+		button.text = "LU"
+	elif mask == (UP | RIGHT | DOWN):
+		button.text = "URD"
+	elif mask == (UP | RIGHT | LEFT):
+		button.text = "URL"
+	elif mask == (RIGHT | DOWN | LEFT):
+		button.text = "RDL"
+	elif mask == (UP | DOWN | LEFT):
+		button.text = "UDL"
+	elif mask == (UP | RIGHT | DOWN | LEFT):
+		button.text = "+"
 	else:
-		button.text = ["-", "L", "T", "+"][rotation]
+		button.text = ""
+
+func _rotate_mask(mask: int, turns: int) -> int:
+	var rotated: int = mask
+	for _turn in range(turns % 4):
+		var next_mask: int = EMPTY
+		if rotated & UP:
+			next_mask |= RIGHT
+		if rotated & RIGHT:
+			next_mask |= DOWN
+		if rotated & DOWN:
+			next_mask |= LEFT
+		if rotated & LEFT:
+			next_mask |= UP
+		rotated = next_mask
+	return rotated
+
+func _get_mask(index: int) -> int:
+	var button: Button = pipe_buttons[index]
+	return _rotate_mask(int(button.get_meta("base_mask")), int(button.get_meta("rotation")))
 
 func _has_source_destination_path() -> bool:
 	if pipe_buttons.is_empty():
 		return false
 	var source: int = 0
 	var destination: int = pipe_buttons.size() - 1
+	if _get_mask(source) & RIGHT == 0 or _get_mask(destination) & UP == 0:
+		return false
 	var visited: Array[bool] = []
 	visited.resize(pipe_buttons.size())
 	visited.fill(false)
@@ -103,55 +154,53 @@ func _has_source_destination_path() -> bool:
 			return true
 		for neighbor in _connected_neighbors(index):
 			if neighbor >= 0 and neighbor < pipe_buttons.size() and not visited[neighbor]:
-				visited[neighbor] = true
-				queue.append(neighbor)
+				if _pipes_connect(index, neighbor):
+					visited[neighbor] = true
+					queue.append(neighbor)
 	return false
 
 func _connected_neighbors(index: int) -> Array[int]:
 	var row: int = index / grid_columns
 	var column: int = index % grid_columns
 	var neighbors: Array[int] = []
-	var button: Button = pipe_buttons[index]
 	if index == 0:
-		neighbors.append(1)
-		neighbors.append(grid_columns)
+		if grid_columns > 1:
+			neighbors.append(1)
 		return neighbors
 	if index == pipe_buttons.size() - 1:
-		neighbors.append(index - 1)
-		neighbors.append(index - grid_columns)
+		if grid_columns > 1:
+			neighbors.append(index - 1)
 		return neighbors
-
-	var rotation: int = int(button.get_meta("rotation"))
-	var is_straight: bool = bool(button.get_meta("straight"))
-	var connections: Array[String] = []
-	if is_straight:
-		connections = ["L", "R"] if rotation % 2 == 1 else ["U", "D"]
-	else:
-		match rotation:
-			0:
-				connections = ["L", "R"]
-			1:
-				connections = ["L", "D"]
-			2:
-				connections = ["L", "R", "D", "U"]
-			3:
-				connections = ["L", "R", "D"]
-
-	for direction in connections:
-		match direction:
-			"L":
-				if column > 0:
-					neighbors.append(index - 1)
-			"R":
-				if column < grid_columns - 1:
-					neighbors.append(index + 1)
-			"U":
-				if row > 0:
-					neighbors.append(index - grid_columns)
-			"D":
-				if row < grid_rows - 1:
-					neighbors.append(index + grid_columns)
+	if column > 0:
+		neighbors.append(index - 1)
+	if column < grid_columns - 1:
+		neighbors.append(index + 1)
+	if row > 0:
+		neighbors.append(index - grid_columns)
+	if row < grid_rows - 1:
+		neighbors.append(index + grid_columns)
 	return neighbors
+
+func _pipes_connect(index: int, neighbor: int) -> bool:
+	var row: int = index / grid_columns
+	var column: int = index % grid_columns
+	var neighbor_row: int = neighbor / grid_columns
+	var neighbor_column: int = neighbor % grid_columns
+	var outgoing: int
+	var incoming: int
+	if neighbor_column > column:
+		outgoing = RIGHT
+		incoming = LEFT
+	elif neighbor_column < column:
+		outgoing = LEFT
+		incoming = RIGHT
+	elif neighbor_row > row:
+		outgoing = DOWN
+		incoming = UP
+	else:
+		outgoing = UP
+		incoming = DOWN
+	return (_get_mask(index) & outgoing) != 0 and (_get_mask(neighbor) & incoming) != 0
 
 func _finish(success: bool) -> void:
 	if finished:

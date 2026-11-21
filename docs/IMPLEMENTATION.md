@@ -78,3 +78,12 @@ Artist-created final assets should replace programmer placeholders without chang
 - Keep star visuals as separate `Sprite2D` nodes at each stage button, not as text labels.
 - Keep stage and mini-game action dimensions fixed until final art is delivered.
 - Add final audio under `assets/audio/` using the paths declared by `scripts/stage/audio_cues.gd`.
+
+## Validation
+
+Run the Sprint 8 checks from the project root:
+
+```powershell
+& 'C:\Program Files (x86)\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe' --headless --editor --quit --path .
+& 'C:\Program Files (x86)\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe' --headless --path . --script res://tests/sprint8_validation.gd
+```

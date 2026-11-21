@@ -214,8 +214,14 @@ func _start_save_the_water() -> void:
 	mini_game_active = true
 
 func _on_real_mini_game_finished(result: int, _remaining_time: float, _correct_actions: int, _errors: int) -> void:
-	if selected_activity and not selected_activity.resolved:
-		_resolve_activity(selected_activity, result)
+	var completed_activity = selected_activity
+	mini_game_active = false
+	if is_instance_valid(active_mini_game):
+		active_mini_game.queue_free()
+	active_mini_game = null
+	selected_activity = null
+	if completed_activity and not completed_activity.resolved:
+		_resolve_activity(completed_activity, result)
 
 func _on_real_mini_game_closed() -> void:
 	if selected_activity:
@@ -256,9 +262,10 @@ func _resolve_activity(activity, result: int) -> void:
 		button.queue_free()
 	bubble_buttons.erase(activity.config.id)
 	stage_runtime.resolve_activity(activity, result)
+	if selected_activity == activity:
+		selected_activity = null
+		activity_popup.hide()
 	_update_hud()
-	if activity.state == 1:
-		activity.state = 4 if result == 0 else 3
 	if stage_runtime.get_unhandled_count() == 0:
 		_end_stage()
 
@@ -267,6 +274,13 @@ func _end_stage() -> void:
 		return
 	stage_ending_started = true
 	stage_runtime.stage_remaining = max(stage_runtime.stage_remaining, 0.0)
+	mini_game_active = false
+	selected_activity = null
+	activity_popup.hide()
+	mini_game_panel.hide()
+	if is_instance_valid(active_mini_game):
+		active_mini_game.queue_free()
+	active_mini_game = null
 	for activity in stage_runtime.activities:
 		if not activity.resolved:
 			stage_runtime.resolve_activity(activity, 0)
