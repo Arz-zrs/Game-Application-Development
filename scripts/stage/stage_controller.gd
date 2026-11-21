@@ -19,12 +19,46 @@ var bubble_buttons: Dictionary = {}
 @onready var mini_game_timer_label: Label = %MiniGameTimerLabel
 @onready var stage_result: PanelContainer = %StageResult
 @onready var result_text: Label = %ResultText
+@onready var tutorial_overlay: Control = get_node_or_null("TutorialOverlay")
+@onready var tutorial_title: Label = get_node_or_null("TutorialOverlay/TutorialPanel/Margin/VBox/TutorialTitle")
+@onready var tutorial_body: Label = get_node_or_null("TutorialOverlay/TutorialPanel/Margin/VBox/TutorialBody")
+@onready var tutorial_step_label: Label = get_node_or_null("TutorialOverlay/TutorialPanel/Margin/VBox/TutorialStepLabel")
+@onready var tutorial_previous_button: Button = get_node_or_null("TutorialOverlay/TutorialPanel/Margin/VBox/Buttons/TutorialPreviousButton")
+@onready var tutorial_next_button: Button = get_node_or_null("TutorialOverlay/TutorialPanel/Margin/VBox/Buttons/TutorialNextButton")
 
 var mini_game_remaining: float = 0.0
 var mini_game_active: bool = false
 var active_mini_game: Node = null
 var bonus_session: Node = null
 var stage_ending_started: bool = false
+var tutorial_step: int = 0
+
+const TUTORIAL_STEPS: Array[Dictionary] = [
+	{
+		"title": "Welcome to Tidy Trails",
+		"body": "You are helping clean this neighborhood. This stage uses the residential map shown behind this guide. Click Next to learn how activities work.",
+	},
+	{
+		"title": "The Stage Map",
+		"body": "Cleaning activities appear as bubbles on the map. Select a bubble to read its objective, then choose Start when you are ready.",
+	},
+	{
+		"title": "Manage Three Timers",
+		"body": "The stage timer keeps running during a mini-game. Each bubble has its own availability timer; it pauses while you play that activity and resumes if you return unfinished.",
+	},
+	{
+		"title": "Play the Mini-games",
+		"body": "Each activity has a mini-game timer and a different goal. Trash Collector: click every trash item. Waste Sorting: select an item, then its matching bin. Drain Cleaner: click every clog.",
+	},
+	{
+		"title": "Earn Points and Stars",
+		"body": "Complete objectives for GREAT or AWESOME points. Running out of time or reaching an error limit gives FAILED and zero points. Your stage score determines stars; three stars unlock the balloon bonus.",
+	},
+	{
+		"title": "Ready to Clean?",
+		"body": "This tutorial uses the Stage 1 map and its real activities. After you begin, select the Trash Collector bubble to try your first activity. You can reopen this guide from the Guide button.",
+	},
+]
 
 func _create_stage_config() -> Resource:
 	var stage_number: int = 1
@@ -44,13 +78,16 @@ func _build_stage() -> void:
 	var config = _create_stage_config()
 	var runtime_script: GDScript = load("res://scripts/stage/stage_runtime.gd")
 	stage_runtime = runtime_script.new(config)
-	%StageTitle.text = config.stage_title
+	%StageTitle.text = "Tutorial - Residential Street" if _is_tutorial_level() else config.stage_title
 	activity_popup.hide()
 	mini_game_panel.hide()
 	stage_result.hide()
 	_update_hud()
+	_maybe_start_tutorial()
 
 func _process(delta: float) -> void:
+	if tutorial_overlay and tutorial_overlay.visible:
+		return
 	if stage_result.visible:
 		return
 	if stage_runtime.stage_remaining <= 0.0:
@@ -83,6 +120,56 @@ func _process(delta: float) -> void:
 	if selected_activity and activity_popup.visible:
 		popup_bubble_timer.text = "Activity time: %02d" % ceili(selected_activity.bubble_remaining)
 	_update_hud()
+
+func _maybe_start_tutorial() -> void:
+	if tutorial_overlay == null or not _is_tutorial_level():
+		return
+	if level_state and not level_state.tutorial_read:
+		_open_tutorial()
+
+func _is_tutorial_level() -> bool:
+	return scene_file_path.ends_with("level_0.tscn")
+
+func _open_tutorial() -> void:
+	if tutorial_overlay == null:
+		return
+	tutorial_step = 0
+	_update_tutorial()
+	tutorial_overlay.show()
+
+func _update_tutorial() -> void:
+	var step: Dictionary = TUTORIAL_STEPS[tutorial_step]
+	tutorial_title.text = step.title
+	tutorial_body.text = step.body
+	tutorial_step_label.text = "Step %d of %d" % [tutorial_step + 1, TUTORIAL_STEPS.size()]
+	tutorial_previous_button.visible = tutorial_step > 0
+	tutorial_next_button.text = "Begin Stage" if tutorial_step == TUTORIAL_STEPS.size() - 1 else "Next"
+
+func _on_tutorial_button_pressed() -> void:
+	_open_tutorial()
+
+func _on_tutorial_previous_pressed() -> void:
+	if tutorial_step <= 0:
+		return
+	tutorial_step -= 1
+	_update_tutorial()
+
+func _on_tutorial_next_pressed() -> void:
+	if tutorial_step < TUTORIAL_STEPS.size() - 1:
+		tutorial_step += 1
+		_update_tutorial()
+		return
+	_close_tutorial()
+
+func _on_tutorial_skip_pressed() -> void:
+	_close_tutorial()
+
+func _close_tutorial() -> void:
+	tutorial_overlay.hide()
+	bubble_spawn_remaining = 0.0
+	if level_state:
+		level_state.tutorial_read = true
+		GlobalState.save()
 
 func _update_hud() -> void:
 	stage_timer_label.text = "Stage time: %02d" % ceili(stage_runtime.stage_remaining)
@@ -286,7 +373,7 @@ func _end_stage() -> void:
 			stage_runtime.resolve_activity(activity, 0)
 	_update_hud()
 	var stars: int = stage_runtime.get_star_count()
-	if stars == 3:
+	if stars == 3 and not _is_tutorial_level():
 		_start_bonus_session()
 		return
 	_show_final_result(stars)
@@ -326,6 +413,8 @@ func _show_final_result(stars: int) -> void:
 	mini_game_panel.hide()
 
 func _save_stage_result(stars: int) -> void:
+	if _is_tutorial_level():
+		return
 	var level_path: String = ResourceUID.ensure_path(scene_file_path)
 	var previous_stars: int = GameState.get_level_stars(level_path)
 	if stars > previous_stars:

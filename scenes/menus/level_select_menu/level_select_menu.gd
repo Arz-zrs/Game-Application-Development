@@ -7,6 +7,7 @@ const LEVEL_PATHS: Array[String] = [
 	"res://scenes/game/levels/level_2.tscn",
 	"res://scenes/game/levels/level_3.tscn",
 ]
+const TUTORIAL_PATH: String = "res://scenes/game/levels/level_0.tscn"
 
 @onready var tutorial_button: Button = $Map/TutorialButton
 @onready var level_buttons: Array[Button] = [
@@ -58,13 +59,13 @@ func _set_star_group(group: Node2D, star_count: int) -> void:
 		stars[index].visible = index < star_count
 
 func _on_tutorial_pressed() -> void:
-	var tutorial_scene: PackedScene = load("res://scenes/game/tutorials/tutorial_1.tscn")
-	if tutorial_scene:
-		var level_state: LevelState = GameState.get_level_state(LEVEL_PATHS[0])
-		if level_state:
-			level_state.tutorial_read = true
-			GlobalState.save()
-		add_child(tutorial_scene.instantiate())
+	var level_state: LevelState = GameState.get_level_state(TUTORIAL_PATH)
+	if level_state:
+		level_state.tutorial_read = false
+		GlobalState.save()
+	GameState.set_checkpoint_level_path(TUTORIAL_PATH)
+	level_paths = [TUTORIAL_PATH]
+	level_selected.emit()
 
 func _on_level_pressed(index: int) -> void:
 	if index < 0 or index >= LEVEL_PATHS.size():

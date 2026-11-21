@@ -1,0 +1,95 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/game/levels/level_1.tscn" id="1_level_1"]
+
+[node name="Level0Tutorial" instance=ExtResource("1_level_1")]
+next_level_path = "res://scenes/game/levels/level_1.tscn"
+
+[node name="TutorialButton" type="Button" parent="TopHud" unique_name_in_owner=true]
+layout_mode = 2
+text = "Guide"
+
+[node name="TutorialOverlay" type="Control" parent="." unique_name_in_owner=true]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="TutorialOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+
+[node name="TutorialPanel" type="PanelContainer" parent="TutorialOverlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -205.0
+offset_right = 300.0
+offset_bottom = 205.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="TutorialOverlay/TutorialPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="TutorialOverlay/TutorialPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TutorialTitle" type="Label" parent="TutorialOverlay/TutorialPanel/Margin/VBox" unique_name_in_owner=true]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Welcome to Tidy Trails"
+horizontal_alignment = 1
+
+[node name="TutorialBody" type="Label" parent="TutorialOverlay/TutorialPanel/Margin/VBox" unique_name_in_owner=true]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Tutorial instructions"
+autowrap_mode = 3
+vertical_alignment = 1
+
+[node name="TutorialStepLabel" type="Label" parent="TutorialOverlay/TutorialPanel/Margin/VBox" unique_name_in_owner=true]
+layout_mode = 2
+text = "Step 1 of 6"
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="TutorialOverlay/TutorialPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TutorialSkipButton" type="Button" parent="TutorialOverlay/TutorialPanel/Margin/VBox/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Skip"
+
+[node name="TutorialPreviousButton" type="Button" parent="TutorialOverlay/TutorialPanel/Margin/VBox/Buttons" unique_name_in_owner=true]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Previous"
+
+[node name="TutorialNextButton" type="Button" parent="TutorialOverlay/TutorialPanel/Margin/VBox/Buttons" unique_name_in_owner=true]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Next"
+
+[connection signal="pressed" from="TopHud/TutorialButton" to="." method="_on_tutorial_button_pressed"]
+[connection signal="pressed" from="TutorialOverlay/TutorialPanel/Margin/VBox/Buttons/TutorialSkipButton" to="." method="_on_tutorial_skip_pressed"]
+[connection signal="pressed" from="TutorialOverlay/TutorialPanel/Margin/VBox/Buttons/TutorialPreviousButton" to="." method="_on_tutorial_previous_pressed"]
+[connection signal="pressed" from="TutorialOverlay/TutorialPanel/Margin/VBox/Buttons/TutorialNextButton" to="." method="_on_tutorial_next_pressed"]

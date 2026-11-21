@@ -15,6 +15,8 @@ func _run_validation() -> void:
 	_validate_countdown_signals()
 	_validate_scoring_and_stars()
 	await _validate_stage_timers()
+	await _validate_tutorial_selection()
+	_validate_reset_checkpoint()
 	await _validate_trash_collector()
 	await _validate_waste_sorting()
 	await _validate_drain_cleaner()
@@ -52,9 +54,42 @@ func _reset_capture() -> void:
 	captured_errors = -1
 
 func _validate_stage_timers() -> void:
-	var stage = await _instantiate_scene("res://scenes/game/levels/level_1.tscn")
+	GameState.get_or_create_state()
+	var tutorial_state: LevelState = GameState.get_level_state("res://scenes/game/levels/level_0.tscn")
+	var tutorial_was_read: bool = tutorial_state.tutorial_read
+	tutorial_state.tutorial_read = false
+	GlobalState.save()
+	var stage = await _instantiate_scene("res://scenes/game/levels/level_0.tscn")
 	if stage == null:
+		tutorial_state.tutorial_read = tutorial_was_read
+		GlobalState.save()
 		return
+	_check(stage.tutorial_overlay.visible, "Level 0 tutorial should open automatically.")
+	_check(stage.stage_runtime.activities.size() == 3, "Level 0 should reuse Stage 1's activities.")
+	var tutorial_stage_time: float = stage.stage_runtime.stage_remaining
+	stage.call("_process", 3.0)
+	_check(is_equal_approx(stage.stage_runtime.stage_remaining, tutorial_stage_time), "Stage timer should pause while the tutorial is open.")
+	stage.call("_on_tutorial_next_pressed")
+	_check(stage.tutorial_step == 1, "Tutorial Next should advance to the next instruction.")
+	stage.call("_on_tutorial_previous_pressed")
+	_check(stage.tutorial_step == 0, "Tutorial Previous should return to the prior instruction.")
+	var tutorial_stars: int = tutorial_state.stars
+	var tutorial_unlocked: bool = tutorial_state.unlocked
+	stage.call("_save_stage_result", 3)
+	_check(tutorial_state.stars == tutorial_stars, "Level 0 should not save stage stars.")
+	_check(tutorial_state.unlocked == tutorial_unlocked, "Level 0 should not change stage unlocks.")
+	stage.tutorial_step = stage.TUTORIAL_STEPS.size() - 1
+	stage.call("_update_tutorial")
+	stage.call("_on_tutorial_next_pressed")
+	_check(not stage.tutorial_overlay.visible, "Begin Stage should close the tutorial.")
+	_check(stage.level_state.tutorial_read, "Beginning the stage should mark the tutorial as read.")
+	_check(is_equal_approx(stage.bubble_spawn_remaining, 0.0), "Beginning the stage should schedule the first bubble.")
+	stage.call("_open_tutorial")
+	stage.call("_on_tutorial_skip_pressed")
+	_check(not stage.tutorial_overlay.visible, "Skip should close the tutorial.")
+	_check(stage.level_state.tutorial_read, "Skipping should mark the tutorial as read.")
+	stage.level_state.tutorial_read = tutorial_was_read
+	GlobalState.save()
 	stage.bubble_spawn_remaining = 100.0
 	var activity = stage.stage_runtime.activities[0]
 	activity.make_available()
@@ -88,6 +123,15 @@ func _validate_stage_timers() -> void:
 		_check(stage_three.stage_runtime.config.stage_duration == 240.0, "Stage 3 should use its configured duration.")
 		await _remove_scene(stage_three)
 
+	var main_stage = await _instantiate_scene("res://scenes/game/levels/level_1.tscn")
+	if main_stage:
+		_check(main_stage.get_node_or_null("TutorialOverlay") == null, "Level 1 should not contain the tutorial overlay.")
+		_check(main_stage.stage_runtime.activities.size() == 3, "Level 1 should use the Stage 1 activity configuration.")
+		var main_stage_time: float = main_stage.stage_runtime.stage_remaining
+		main_stage.call("_process", 1.0)
+		_check(is_equal_approx(main_stage.stage_runtime.stage_remaining, main_stage_time - 1.0), "Level 1 should run without opening the tutorial.")
+		await _remove_scene(main_stage)
+
 func _validate_countdown_signals() -> void:
 	var timer_script: GDScript = load("res://scripts/timers/countdown_timer.gd")
 	var timer = timer_script.new(2.0, 1.0)
@@ -104,6 +148,52 @@ func _validate_countdown_signals() -> void:
 	timer.tick(1.0)
 	_check(completion_count == 1, "Countdown completion should emit exactly once.")
 	_check(timer.remaining == 0.0, "Countdown should clamp at zero.")
+
+func _validate_tutorial_selection() -> void:
+	var scene = await _instantiate_scene("res://scenes/menus/level_select_menu/level_select_menu.tscn")
+	if scene == null:
+		return
+	var tutorial_path: String = "res://scenes/game/levels/level_0.tscn"
+	var level_state: LevelState = GameState.get_level_state(tutorial_path)
+	var tutorial_was_read: bool = level_state.tutorial_read
+	var previous_checkpoint: String = GameState.get_checkpoint_level_path()
+	var previous_selection_count: int = completion_count
+	scene.level_selected.connect(_capture_completion)
+	scene.call("_on_tutorial_pressed")
+	_check(completion_count == previous_selection_count + 1, "Tutorial selection should emit the level-selected signal.")
+	_check(GameState.get_checkpoint_level_path() == tutorial_path, "Tutorial selection should route to Level 0.")
+	_check(scene.level_paths == [tutorial_path], "Tutorial selection should load only Level 0.")
+	_check(not level_state.tutorial_read, "Tutorial selection should reset the Level 0 tutorial.")
+	GameState.set_checkpoint_level_path(previous_checkpoint)
+	level_state.tutorial_read = tutorial_was_read
+	GlobalState.save()
+	await _remove_scene(scene)
+
+func _validate_reset_checkpoint() -> void:
+	var game_state: GameState = GameState.get_or_create_state()
+	var previous_level_states: Dictionary = game_state.level_states.duplicate()
+	var previous_current_path: String = game_state.current_level_path
+	var previous_checkpoint_path: String = game_state.checkpoint_level_path
+	var previous_play_time: int = game_state.play_time
+	var previous_total_time: int = game_state.total_time
+	var previous_tutorial_unlocked: bool = game_state.tutorial_unlocked
+
+	GameState.reset()
+	_check(
+		GameState.get_checkpoint_level_path() == GameState.INITIAL_LEVEL_PATH,
+		"Resetting game data should set the tutorial as the starting checkpoint."
+	)
+	_check(GameState.get_current_level_path().is_empty(), "Resetting game data should clear the current level.")
+	var fresh_tutorial_state: LevelState = GameState.get_level_state(GameState.INITIAL_LEVEL_PATH)
+	_check(fresh_tutorial_state != null and not fresh_tutorial_state.tutorial_read, "A fresh tutorial should be unread.")
+
+	game_state.level_states = previous_level_states
+	game_state.current_level_path = previous_current_path
+	game_state.checkpoint_level_path = previous_checkpoint_path
+	game_state.play_time = previous_play_time
+	game_state.total_time = previous_total_time
+	game_state.tutorial_unlocked = previous_tutorial_unlocked
+	GlobalState.save()
 
 func _validate_scoring_and_stars() -> void:
 	var activity_script: GDScript = load("res://scripts/stage/activity_config.gd")
@@ -270,6 +360,7 @@ func _validate_scene_loads() -> void:
 	var scene_paths: Array[String] = [
 		"res://scenes/menus/main_menu/main_menu.tscn",
 		"res://scenes/menus/level_select_menu/level_select_menu.tscn",
+		"res://scenes/game/levels/level_0.tscn",
 		"res://scenes/game/levels/level_1.tscn",
 		"res://scenes/game/levels/level_2.tscn",
 		"res://scenes/game/levels/level_3.tscn",

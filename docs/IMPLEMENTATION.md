@@ -31,6 +31,8 @@ tests/                      Focused automated and scene tests
 
 The existing `scenes/game/levels/` files are level containers. Shared stage implementation should live in the new stage, mini-game, script, and resource folders to avoid duplicating gameplay into every level.
 
+`level_0.tscn` is the separate tutorial entry and reuses Level 1's residential map and activities. Resetting game data sets Level 0 as the starting checkpoint. It is not part of the Level 1–3 star/unlock progression; Level 1 remains the first main stage.
+
 ## Temporary Art Rule
 
 All programmer-created art is temporary placeholder art.

@@ -12,20 +12,5 @@ signal level_changed(level_path : String)
 
 var level_state : LevelState
 
-func open_tutorials() -> void:
-	var tutorial_manager := get_node_or_null(^"%TutorialManager")
-	if tutorial_manager and tutorial_manager.has_method("open_tutorials"):
-		tutorial_manager.open_tutorials()
-	if level_state:
-		level_state.tutorial_read = true
-		GlobalState.save()
-
 func _ready() -> void:
 	level_state = GameState.get_level_state(scene_file_path)
-	if level_state == null:
-		return
-	if not level_state.tutorial_read:
-		open_tutorials()
-
-func _on_tutorial_button_pressed() -> void:
-	open_tutorials()

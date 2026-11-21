@@ -3,6 +3,7 @@ extends Resource
 
 const STATE_NAME : String = "GameState"
 const FILE_PATH = "res://scripts/game_state.gd"
+const INITIAL_LEVEL_PATH : String = "res://scenes/game/levels/level_0.tscn"
 
 @export var level_states : Dictionary = {}
 @export var current_level_path : String
@@ -76,7 +77,7 @@ static func reset() -> void:
 	var game_state := get_or_create_state()
 	game_state.level_states = {}
 	game_state.current_level_path = ""
-	game_state.checkpoint_level_path = ""
+	game_state.checkpoint_level_path = INITIAL_LEVEL_PATH
 	game_state.play_time = 0
 	game_state.total_time = 0
 	game_state.tutorial_unlocked = true
