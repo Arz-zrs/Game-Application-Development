@@ -25,54 +25,14 @@ var mini_game_active: bool = false
 var active_mini_game: Node = null
 
 func _create_stage_config() -> Resource:
-	var config_script: GDScript = load("res://scripts/stage/stage_config.gd")
-	var config = config_script.new()
-	config.stage_title = "Stage 1 - Residential Street"
-	config.stage_duration = 180.0
-	config.bubble_interval_min = 12.0
-	config.bubble_interval_max = 18.0
-	config.max_active_bubbles = 2
-
-	var activity_script: GDScript = load("res://scripts/stage/activity_config.gd")
-	var trash = activity_script.new()
-	trash.id = "stage1_trash"
-	trash.title = "Trash Collector"
-	trash.mini_game_type = 0
-	trash.bubble_duration = 40.0
-	trash.mini_game_duration = 35.0
-	trash.great_points = 100
-	trash.awesome_points = 150
-	trash.awesome_remaining_time = 10.0
-	trash.map_position = Vector2(0.24, 0.62)
-
-	var sorting = activity_script.new()
-	sorting.id = "stage1_sorting"
-	sorting.title = "Waste Sorting"
-	sorting.mini_game_type = 1
-	sorting.bubble_duration = 45.0
-	sorting.mini_game_duration = 40.0
-	sorting.max_errors = 3
-	sorting.awesome_max_errors = 1
-	sorting.great_points = 100
-	sorting.awesome_points = 150
-	sorting.awesome_remaining_time = 10.0
-	sorting.map_position = Vector2(0.50, 0.42)
-
-	var drain = activity_script.new()
-	drain.id = "stage1_drain"
-	drain.title = "Drain Cleaner"
-	drain.mini_game_type = 2
-	drain.bubble_duration = 40.0
-	drain.mini_game_duration = 35.0
-	drain.great_points = 100
-	drain.awesome_points = 150
-	drain.awesome_remaining_time = 10.0
-	drain.map_position = Vector2(0.76, 0.68)
-
-	config.activities.append(trash)
-	config.activities.append(sorting)
-	config.activities.append(drain)
-	return config
+	var stage_number: int = 1
+	if scene_file_path.ends_with("level_2.tscn"):
+		stage_number = 2
+	elif scene_file_path.ends_with("level_3.tscn"):
+		stage_number = 3
+	var variant_script: GDScript = load("res://scripts/stage/stage_variants.gd")
+	var variants = variant_script.new()
+	return variants.create_config(stage_number)
 
 func _ready() -> void:
 	super._ready()
@@ -163,6 +123,10 @@ func _get_objective(config) -> String:
 			return "Sort every waste item into the correct bin."
 		2:
 			return "Clear every clogged drain item."
+		3:
+			return "Catch the flowing waste while avoiding pollution."
+		4:
+			return "Rotate pipe segments to connect source and destination."
 		_:
 			return "Complete the environmental cleaning activity."
 
@@ -186,6 +150,9 @@ func _on_popup_start_pressed() -> void:
 		return
 	if selected_activity.config.mini_game_type == 3:
 		_start_river_cleaner()
+		return
+	if selected_activity.config.mini_game_type == 4:
+		_start_save_the_water()
 		return
 	mini_game_title.text = selected_activity.config.title
 	mini_game_objective.text = _get_objective(selected_activity.config)
@@ -230,6 +197,15 @@ func _start_river_cleaner() -> void:
 	active_mini_game.activity_duration = selected_activity.config.mini_game_duration
 	active_mini_game.max_errors = selected_activity.config.max_errors
 	active_mini_game.target_count = 8
+	active_mini_game.mini_game_finished.connect(_on_real_mini_game_finished)
+	active_mini_game.mini_game_closed.connect(_on_real_mini_game_closed)
+	add_child(active_mini_game)
+	mini_game_active = true
+
+func _start_save_the_water() -> void:
+	var scene: PackedScene = load("res://scenes/game/mini_games/save_the_water/save_the_water.tscn")
+	active_mini_game = scene.instantiate()
+	active_mini_game.activity_duration = selected_activity.config.mini_game_duration
 	active_mini_game.mini_game_finished.connect(_on_real_mini_game_finished)
 	active_mini_game.mini_game_closed.connect(_on_real_mini_game_closed)
 	add_child(active_mini_game)
