@@ -1,22 +1,69 @@
-[gd_scene format=3 uid="uid://bvbck0qxxi76j"]
+[gd_scene format=3 uid="uid://ccve50drghao5"]
 
-[ext_resource type="Script" path="res://scenes/game/levels/level_1.gd" id="1_kdlgo"]
-[ext_resource type="Script" path="res://addons/maaacks_game_template/base/nodes/utilities/capture_focus.gd" id="2_1bryu"]
-[ext_resource type="Script" path="res://scenes/game/scripts/input_display_label.gd" id="3_dxp7b"]
-[ext_resource type="Script" path="res://scenes/game/scripts/tutorial_manager.gd" id="4_unvbt"]
-[ext_resource type="PackedScene" path="res://scenes/game/tutorials/tutorial_1.tscn" id="5_2u4xi"]
+[ext_resource type="Script" uid="uid://d2a8vcimg7l04" path="res://scenes/game/levels/level_1.gd" id="1_level"]
 
-[node name="Level1" type="Control" unique_id=235822082]
+[node name="Level1" type="Control" unique_id=1468503000]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_kdlgo")
+script = ExtResource("1_level")
 next_level_path = "res://scenes/game/levels/level_2.tscn"
 
-[node name="BackgroundColor" type="ColorRect" parent="." unique_id=1389548597]
+[node name="Background" type="ColorRect" parent="." unique_id=1994911005]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.24, 0.46, 0.35, 1)
+
+[node name="Street" type="ColorRect" parent="." unique_id=401272273]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.55
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.28, 0.29, 0.31, 1)
+
+[node name="TopHud" type="HBoxContainer" parent="." unique_id=1419581762]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 64.0
+grow_horizontal = 2
+
+[node name="StageTitle" type="Label" parent="TopHud" unique_id=843748469]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "Stage 1"
+
+[node name="StageTimerLabel" type="Label" parent="TopHud" unique_id=2087827063]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Stage time: 180"
+
+[node name="StageScoreLabel" type="Label" parent="TopHud" unique_id=921640087]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Points: 0"
+
+[node name="StarLabel" type="Label" parent="TopHud" unique_id=2055192445]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Stars: 0"
+
+[node name="BubbleLayer" type="Control" parent="." unique_id=251497335]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -24,80 +71,173 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 1)
+mouse_filter = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1051608179]
+[node name="ActivityPopup" type="PanelContainer" parent="." unique_id=1081278553]
+unique_name_in_owner = true
+visible = false
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -130.0
+offset_right = 180.0
+offset_bottom = 130.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 32
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1696412727]
+[node name="Margin" type="MarginContainer" parent="ActivityPopup" unique_id=1073540287]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="ActivityPopup/Margin" unique_id=408183129]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PopupTitle" type="Label" parent="ActivityPopup/Margin/VBox" unique_id=1426092132]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Activity"
+horizontal_alignment = 1
+
+[node name="PopupObjective" type="Label" parent="ActivityPopup/Margin/VBox" unique_id=1816037924]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+text = "Objective"
+autowrap_mode = 3
+
+[node name="PopupBubbleTimer" type="Label" parent="ActivityPopup/Margin/VBox" unique_id=1158460963]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Activity time: 40"
+
+[node name="Buttons" type="HBoxContainer" parent="ActivityPopup/Margin/VBox" unique_id=663630560]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CloseButton" type="Button" parent="ActivityPopup/Margin/VBox/Buttons" unique_id=1932257496]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Close"
+
+[node name="StartButton" type="Button" parent="ActivityPopup/Margin/VBox/Buttons" unique_id=1537116359]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Start"
+
+[node name="MiniGamePanel" type="PanelContainer" parent="." unique_id=72278534]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -160.0
+offset_right = 220.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="MiniGamePanel" unique_id=1085820207]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MiniGamePanel/Margin" unique_id=1461158760]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MiniGameTitle" type="Label" parent="MiniGamePanel/Margin/VBox" unique_id=12191584]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Placeholder Mini-game"
+horizontal_alignment = 1
+
+[node name="MiniGameObjective" type="Label" parent="MiniGamePanel/Margin/VBox" unique_id=1844543291]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+text = "Complete the real mini-game implementation."
+autowrap_mode = 3
+
+[node name="MiniGameTimerLabel" type="Label" parent="MiniGamePanel/Margin/VBox" unique_id=352133906]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mini-game time: 35"
+
+[node name="Buttons" type="HBoxContainer" parent="MiniGamePanel/Margin/VBox" unique_id=1716340579]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ReturnButton" type="Button" parent="MiniGamePanel/Margin/VBox/Buttons" unique_id=2041887310]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Return Unfinished"
+
+[node name="FinishButton" type="Button" parent="MiniGamePanel/Margin/VBox/Buttons" unique_id=1378394436]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Finish Placeholder"
+
+[node name="StageResult" type="PanelContainer" parent="." unique_id=1071150942]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -140.0
+offset_right = 180.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="StageResult" unique_id=919391084]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="StageResult/Margin" unique_id=262539376]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1771422232]
+[node name="ResultTitle" type="Label" parent="StageResult/Margin/VBox" unique_id=647805250]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "Example Level #1"
+theme_override_font_sizes/font_size = 24
+text = "Stage Complete"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1105591262]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=580896160]
+[node name="ResultText" type="Label" parent="StageResult/Margin/VBox" unique_id=1401181339]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 32
-script = ExtResource("2_1bryu")
+text = "Final score"
 
-[node name="LoseButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1120638699]
+[node name="ContinueButton" type="Button" parent="StageResult/Margin/VBox" unique_id=980741558]
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Press
-To Lose"
+text = "Continue"
 
-[node name="WinButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1019168185]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Press
-To Win"
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1186288776]
-layout_mode = 2
-
-[node name="TutorialButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=501380068]
-layout_mode = 2
-text = "Tutorial"
-
-[node name="InputDisplayLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=743402689]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 1
-script = ExtResource("3_dxp7b")
-
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1165919418]
-layout_mode = 2
-text = "Change Level Color: "
-
-[node name="ColorPickerButton" type="ColorPickerButton" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=2109296008]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Change Color"
-
-[node name="TutorialManager" type="Node" parent="." unique_id=928060640]
-unique_name_in_owner = true
-script = ExtResource("4_unvbt")
-tutorial_scenes = Array[PackedScene]([ExtResource("5_2u4xi")])
-
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/LoseButton" to="." method="_on_lose_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/WinButton" to="." method="_on_win_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/TutorialButton" to="." method="_on_tutorial_button_pressed"]
-[connection signal="color_changed" from="MarginContainer/VBoxContainer/HBoxContainer2/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
+[connection signal="pressed" from="ActivityPopup/Margin/VBox/Buttons/CloseButton" to="." method="_on_popup_close_pressed"]
+[connection signal="pressed" from="ActivityPopup/Margin/VBox/Buttons/StartButton" to="." method="_on_popup_start_pressed"]
+[connection signal="pressed" from="MiniGamePanel/Margin/VBox/Buttons/ReturnButton" to="." method="_on_return_placeholder_pressed"]
+[connection signal="pressed" from="MiniGamePanel/Margin/VBox/Buttons/FinishButton" to="." method="_on_finish_placeholder_pressed"]
+[connection signal="pressed" from="StageResult/Margin/VBox/ContinueButton" to="." method="_on_continue_pressed"]

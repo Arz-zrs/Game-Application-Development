@@ -19,6 +19,8 @@ func open_tutorials() -> void:
 
 func _ready() -> void:
 	level_state = GameState.get_level_state(scene_file_path)
+	if level_state == null:
+		return
 	if not level_state.tutorial_read:
 		open_tutorials()
 
