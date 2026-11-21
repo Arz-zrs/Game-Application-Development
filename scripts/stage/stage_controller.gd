@@ -23,6 +23,8 @@ var bubble_buttons: Dictionary = {}
 var mini_game_remaining: float = 0.0
 var mini_game_active: bool = false
 var active_mini_game: Node = null
+var bonus_session: Node = null
+var stage_ending_started: bool = false
 
 func _create_stage_config() -> Resource:
 	var stage_number: int = 1
@@ -261,14 +263,38 @@ func _resolve_activity(activity, result: int) -> void:
 		_end_stage()
 
 func _end_stage() -> void:
-	if stage_result.visible:
+	if stage_ending_started:
 		return
+	stage_ending_started = true
 	stage_runtime.stage_remaining = max(stage_runtime.stage_remaining, 0.0)
 	for activity in stage_runtime.activities:
 		if not activity.resolved:
 			stage_runtime.resolve_activity(activity, 0)
 	_update_hud()
 	var stars: int = stage_runtime.get_star_count()
+	if stars == 3:
+		_start_bonus_session()
+		return
+	_show_final_result(stars)
+
+func _start_bonus_session() -> void:
+	var scene: PackedScene = load("res://scenes/game/stages/stage_bonus.tscn")
+	bonus_session = scene.instantiate()
+	bonus_session.bonus_duration = stage_runtime.config.bonus_duration
+	bonus_session.balloon_points = stage_runtime.config.balloon_points
+	bonus_session.bonus_finished.connect(_on_bonus_finished)
+	add_child(bonus_session)
+	activity_popup.hide()
+	mini_game_panel.hide()
+
+func _on_bonus_finished(total_bonus: int) -> void:
+	stage_runtime.bonus_points = total_bonus
+	if is_instance_valid(bonus_session):
+		bonus_session.queue_free()
+	bonus_session = null
+	_show_final_result(stage_runtime.get_star_count())
+
+func _show_final_result(stars: int) -> void:
 	result_text.text = (
 		"Mini-game points: %d\n"
 		+ "Bonus points: %d\n"
