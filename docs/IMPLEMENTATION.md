@@ -67,3 +67,14 @@ These values are initial programmer defaults and must be moved into editable sta
 - GREAT: 100 points
 - AWESOME: 150 points
 - Star thresholds: 25%, 50%, and 75% of possible mini-game points
+
+## Artist Asset Integration
+
+Artist-created final assets should replace programmer placeholders without changing gameplay scripts.
+
+- Put temporary programmer placeholders in `assets/placeholders/`.
+- Put artist-delivered assets in `assets/art/`.
+- Use stable scene-node names and exported texture/resource properties.
+- Keep star visuals as separate `Sprite2D` nodes at each stage button, not as text labels.
+- Keep stage and mini-game action dimensions fixed until final art is delivered.
+- Add final audio under `assets/audio/` using the paths declared by `scripts/stage/audio_cues.gd`.

@@ -1,49 +1,156 @@
-[gd_scene format=3 uid="uid://ditnhw6ko13vl"]
+[gd_scene format=3 uid="uid://0g0widm57nmc"]
 
-[ext_resource type="Script" path="res://scenes/menus/level_select_menu/level_select_menu.gd" id="1_a0tqu"]
-[ext_resource type="Script" path="res://addons/maaacks_game_template/base/nodes/utilities/capture_focus.gd" id="2_tjb7s"]
-[ext_resource type="Script" path="res://addons/maaacks_game_template/extras/scripts/scene_lister.gd" id="3_le4jx"]
+[ext_resource type="Script" uid="uid://ddhmthgcoercx" path="res://scenes/menus/level_select_menu/level_select_menu.gd" id="1_select"]
+[ext_resource type="Texture2D" uid="uid://dpmh6absyot5g" path="res://assets/textures/Background.png" id="2_background"]
 
-[node name="LevelSelectMenu" type="Control" unique_id=1470024191]
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_star"]
+size = Vector2(32, 32)
+
+[node name="LevelSelectMenu" type="Control" unique_id=1063480824]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_a0tqu")
+script = ExtResource("1_select")
 
-[node name="Control" type="Control" parent="." unique_id=1541649425]
+[node name="Background" type="TextureRect" parent="." unique_id=72285760]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("2_tjb7s")
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="LevelButtonsContainer" type="ItemList" parent="Control" unique_id=17921809]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(400, 0)
+[node name="Map" type="Control" parent="." unique_id=480086314]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -17.5
-offset_right = 200.0
-offset_bottom = 17.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-auto_height = true
-item_count = 1
-item_0/text = "1 - ExampleLevel"
 
-[node name="SceneLister" type="Node" parent="." unique_id=1851760223]
-script = ExtResource("3_le4jx")
-files = Array[String](["res://scenes/game/levels/level_1.tscn", "res://scenes/game/levels/level_2.tscn", "res://scenes/game/levels/level_3.tscn"])
-directory = "res://scenes/game/levels"
+[node name="TutorialButton" type="Button" parent="Map" unique_id=1057011171]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 250.0
+offset_right = 220.0
+offset_bottom = 330.0
+text = "Tutorial"
 
-[connection signal="item_activated" from="Control/LevelButtonsContainer" to="." method="_on_level_buttons_container_item_activated"]
+[node name="TutorialStars" type="Node2D" parent="Map" unique_id=2030993180]
+position = Vector2(150, 348)
+
+[node name="TutorialStar1" type="Sprite2D" parent="Map/TutorialStars" unique_id=209415387]
+position = Vector2(-28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="TutorialStar2" type="Sprite2D" parent="Map/TutorialStars" unique_id=1205851109]
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="TutorialStar3" type="Sprite2D" parent="Map/TutorialStars" unique_id=1083145159]
+position = Vector2(28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level1Button" type="Button" parent="Map" unique_id=2070642493]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 250.0
+offset_right = 440.0
+offset_bottom = 330.0
+text = "Level 1"
+
+[node name="Level1Stars" type="Node2D" parent="Map" unique_id=627527157]
+position = Vector2(370, 348)
+
+[node name="Level1Star1" type="Sprite2D" parent="Map/Level1Stars" unique_id=366648645]
+position = Vector2(-28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level1Star2" type="Sprite2D" parent="Map/Level1Stars" unique_id=895929328]
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level1Star3" type="Sprite2D" parent="Map/Level1Stars" unique_id=391103092]
+position = Vector2(28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level2Button" type="Button" parent="Map" unique_id=1728768760]
+layout_mode = 0
+offset_left = 520.0
+offset_top = 250.0
+offset_right = 660.0
+offset_bottom = 330.0
+text = "Level 2"
+
+[node name="Level2Stars" type="Node2D" parent="Map" unique_id=34060601]
+position = Vector2(590, 348)
+
+[node name="Level2Star1" type="Sprite2D" parent="Map/Level2Stars" unique_id=461374333]
+position = Vector2(-28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level2Star2" type="Sprite2D" parent="Map/Level2Stars" unique_id=865722521]
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level2Star3" type="Sprite2D" parent="Map/Level2Stars" unique_id=2016327424]
+position = Vector2(28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level3Button" type="Button" parent="Map" unique_id=1318081504]
+layout_mode = 0
+offset_left = 740.0
+offset_top = 250.0
+offset_right = 880.0
+offset_bottom = 330.0
+text = "Level 3"
+
+[node name="Level3Stars" type="Node2D" parent="Map" unique_id=14668046]
+position = Vector2(810, 348)
+
+[node name="Level3Star1" type="Sprite2D" parent="Map/Level3Stars" unique_id=1321944185]
+position = Vector2(-28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level3Star2" type="Sprite2D" parent="Map/Level3Stars" unique_id=651237949]
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Level3Star3" type="Sprite2D" parent="Map/Level3Stars" unique_id=392744245]
+position = Vector2(28, 0)
+texture = SubResource("PlaceholderTexture2D_star")
+
+[node name="Connection1" type="Line2D" parent="Map" unique_id=310549386]
+points = PackedVector2Array(220, 290, 300, 290)
+width = 8.0
+default_color = Color(0.92, 0.82, 0.42, 1)
+
+[node name="Connection2" type="Line2D" parent="Map" unique_id=1748146808]
+points = PackedVector2Array(440, 290, 520, 290)
+width = 8.0
+default_color = Color(0.92, 0.82, 0.42, 1)
+
+[node name="Connection3" type="Line2D" parent="Map" unique_id=486011241]
+points = PackedVector2Array(660, 290, 740, 290)
+width = 8.0
+default_color = Color(0.92, 0.82, 0.42, 1)
+
+[node name="BackButton" type="Button" parent="." unique_id=435238120]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = -64.0
+offset_right = 145.0
+offset_bottom = -13.0
+grow_vertical = 0
+text = "Back"
+
+[connection signal="pressed" from="Map/TutorialButton" to="." method="_on_tutorial_pressed"]
+[connection signal="pressed" from="Map/Level1Button" to="." method="_on_level_pressed" binds= [0]]
+[connection signal="pressed" from="Map/Level2Button" to="." method="_on_level_pressed" binds= [1]]
+[connection signal="pressed" from="Map/Level3Button" to="." method="_on_level_pressed" binds= [2]]
+[connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]

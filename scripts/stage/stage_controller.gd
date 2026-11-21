@@ -295,6 +295,7 @@ func _on_bonus_finished(total_bonus: int) -> void:
 	_show_final_result(stage_runtime.get_star_count())
 
 func _show_final_result(stars: int) -> void:
+	_save_stage_result(stars)
 	result_text.text = (
 		"Mini-game points: %d\n"
 		+ "Bonus points: %d\n"
@@ -309,6 +310,17 @@ func _show_final_result(stars: int) -> void:
 	stage_result.show()
 	activity_popup.hide()
 	mini_game_panel.hide()
+
+func _save_stage_result(stars: int) -> void:
+	var level_path: String = ResourceUID.ensure_path(scene_file_path)
+	var previous_stars: int = GameState.get_level_stars(level_path)
+	if stars > previous_stars:
+		GameState.set_level_stars(level_path, stars)
+	GameState.set_level_unlocked(level_path, true)
+	if level_path.ends_with("level_1.tscn"):
+		GameState.set_level_unlocked("res://scenes/game/levels/level_2.tscn", true)
+	elif level_path.ends_with("level_2.tscn"):
+		GameState.set_level_unlocked("res://scenes/game/levels/level_3.tscn", true)
 
 func _on_continue_pressed() -> void:
 	level_won.emit(next_level_path)

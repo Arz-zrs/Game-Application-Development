@@ -24,7 +24,6 @@ func new_game() -> void:
 
 func _add_level_select_if_set() -> void: 
 	if level_select_packed_scene == null: return
-	if GameState.get_levels_reached() <= 1 : return
 	level_select_button.show()
 
 func _show_continue_if_set() -> void:

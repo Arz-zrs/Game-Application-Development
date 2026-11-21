@@ -11,6 +11,8 @@ const FILE_PATH = "res://scripts/game_state.gd"
 @export var play_time : int
 @export var total_time : int
 
+@export var tutorial_unlocked : bool = true
+
 static func get_level_state(level_state_key : String) -> LevelState:
 	level_state_key = ResourceUID.ensure_path(level_state_key)
 	if not has_game_state(): 
@@ -77,4 +79,29 @@ static func reset() -> void:
 	game_state.checkpoint_level_path = ""
 	game_state.play_time = 0
 	game_state.total_time = 0
+	game_state.tutorial_unlocked = true
 	GlobalState.save()
+
+static func set_level_stars(level_path : String, stars : int) -> void:
+	var level_state := get_level_state(level_path)
+	if level_state == null:
+		return
+	level_state.stars = clampi(stars, 0, 3)
+	GlobalState.save()
+
+static func get_level_stars(level_path : String) -> int:
+	var level_state := get_level_state(level_path)
+	if level_state == null:
+		return 0
+	return level_state.stars
+
+static func set_level_unlocked(level_path : String, unlocked : bool) -> void:
+	var level_state := get_level_state(level_path)
+	if level_state == null:
+		return
+	level_state.unlocked = unlocked
+	GlobalState.save()
+
+static func is_level_unlocked(level_path : String) -> bool:
+	var level_state := get_level_state(level_path)
+	return level_state != null and level_state.unlocked
